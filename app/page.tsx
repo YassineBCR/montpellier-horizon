@@ -24,7 +24,7 @@ export default function Home() {
           Montpellier <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">Horizon</span>
         </h1>
         <p className="text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed">
-          Votre voix compte. Construisons ensemble un plaidoyer structuré pour peser sur les décisions locales.
+          Votre voix construit le Montpellier de demain
         </p>
         
         <div className="flex flex-col sm:flex-row justify-center gap-4">
