@@ -22,7 +22,7 @@ export default function LoginPage() {
       if (result?.error) {
         toast({ variant: "destructive", title: "Erreur", description: result.error })
       } else {
-        toast({ title: type === 'login' ? "Connexion réussie" : "Compte créé", description: "Bienvenue sur Montpellier Horizon." })
+        toast({ title: "Bienvenue !", description: "Vous êtes connecté." })
       }
     } finally {
       setIsLoading(false)
@@ -30,7 +30,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/20 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-muted/20 p-4 relative">
       <div className="absolute top-8 left-8">
         <Button variant="ghost" asChild>
            <Link href="/"><ArrowLeft className="mr-2 h-4 w-4"/> Retour au site</Link>
@@ -38,9 +38,9 @@ export default function LoginPage() {
       </div>
       
       <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Espace Citoyen</CardTitle>
-          <CardDescription>Connectez-vous pour participer à la vie de la ville.</CardDescription>
+        <CardHeader className="text-center pb-2">
+          <CardTitle className="text-2xl font-bold">Espace Membre</CardTitle>
+          <CardDescription>Connectez-vous pour participer ou gérer la plateforme.</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
@@ -49,12 +49,11 @@ export default function LoginPage() {
               <TabsTrigger value="register">Inscription</TabsTrigger>
             </TabsList>
 
-            {/* FORMULAIRE CONNEXION */}
             <TabsContent value="login">
               <form action={(fd) => handleSubmit(fd, login, 'login')} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" name="email" type="email" placeholder="nom@exemple.com" required />
+                  <Input id="email" name="email" type="email" placeholder="exemple@email.com" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Mot de passe</Label>
@@ -66,16 +65,15 @@ export default function LoginPage() {
               </form>
             </TabsContent>
 
-            {/* FORMULAIRE INSCRIPTION */}
             <TabsContent value="register">
               <form action={(fd) => handleSubmit(fd, signup, 'signup')} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" name="email" type="email" placeholder="nom@exemple.com" required />
+                  <Input id="email" name="email" type="email" required />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="pseudo">Pseudo (Optionnel)</Label>
-                    <Input id="pseudo" name="pseudo" type="text" placeholder="Comment voulez-vous être appelé ?" />
+                    <Label htmlFor="pseudo">Pseudo</Label>
+                    <Input id="pseudo" name="pseudo" type="text" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Mot de passe</Label>

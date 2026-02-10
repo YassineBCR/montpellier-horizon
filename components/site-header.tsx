@@ -9,7 +9,6 @@ export async function SiteHeader() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Vérification du rôle UNIQUEMENT si connecté
   let isAdmin = false
   if (user) {
     const { data: profile } = await supabase
@@ -33,7 +32,7 @@ export async function SiteHeader() {
         <nav className="flex items-center gap-3 md:gap-4">
           {user ? (
             <>
-              {/* Bouton Admin - Visible uniquement si Admin */}
+              {/* BOUTON DASHBOARD : Seulement si Admin */}
               {isAdmin && (
                 <Button variant="default" size="sm" asChild className="hidden md:flex shadow-sm bg-purple-600 hover:bg-purple-700 text-white">
                   <Link href="/dashboard"><LayoutDashboard className="w-4 h-4 mr-2"/> Admin</Link>
@@ -54,6 +53,7 @@ export async function SiteHeader() {
               </div>
             </>
           ) : (
+            /* BOUTONS PUBLICS : Pour tout le monde */
             <div className="flex gap-2">
                 <Button variant="ghost" size="sm" asChild className="hidden sm:flex">
                 <Link href="/login">Inscription</Link>
