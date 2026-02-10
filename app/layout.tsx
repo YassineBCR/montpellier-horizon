@@ -1,25 +1,37 @@
-import React from "react"
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+// app/layout.tsx
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
 
-import './globals.css'
-
-const _inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Montpellier Horizon - Plateforme de Participation Citoyenne',
-  description:
-    'Collectons, structurons et présentons nos besoins aux candidats des municipales. Une plateforme de démocratie participative pour Montpellier.',
-}
+  title: "Montpellier Horizon",
+  description: "Plateforme participative citoyenne",
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
-      <body className="font-sans antialiased">{children}</body>
+    <html lang="fr" suppressHydrationWarning>
+      <body className={`${inter.className} font-sans antialiased`}>
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+          {children}
+          <Toaster />
+          <Sonner />
+        </ThemeProvider>
+      </body>
     </html>
-  )
+  );
 }

@@ -27,12 +27,16 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Rafraîchir la session pour s'assurer que l'user est bien à jour
   const { data: { user } } = await supabase.auth.getUser()
 
-  // PROTECTION 1 : Si on tente d'accéder au dashboard sans être connecté -> Login
+  // 1. Si on accède au Dashboard sans être connecté -> Login
   if (request.nextUrl.pathname.startsWith('/dashboard') && !user) {
     return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  // 2. Si on est déjà connecté et qu'on va sur Login -> Accueil
+  if (request.nextUrl.pathname.startsWith('/login') && user) {
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
   return response
