@@ -1,75 +1,111 @@
 "use client"
 
-import { useState } from "react"
-import { Menu, X } from "lucide-react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
+import { supabase } from "@/lib/supabase" // Assurez-vous que ce chemin est correct
 import { Button } from "@/components/ui/button"
-
-const navItems = [
-  { label: "Accueil", href: "#accueil" },
-  { label: "Propositions", href: "#propositions" },
-  { label: "Consultations", href: "#consultations" },
-  { label: "Manifeste", href: "#manifeste" },
-]
+import { Menu, X, User, LayoutDashboard } from "lucide-react"
 
 export function SiteHeader() {
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const pathname = usePathname()
+  const [isOpen, setIsOpen] = useState(false)
+  const [user, setUser] = useState<any>(null)
+
+  // Vérifier si l'utilisateur est connecté
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      setUser(session?.user || null)
+    }
+    checkUser()
+
+    // Écouter les changements d'état (connexion/déconnexion)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const routes = [
+    { href: "/", label: "Accueil" },
+    { href: "/#manifesto", label: "Manifeste" },
+    { href: "/#propose", label: "Participer" },
+    { href: "/#ideas", label: "Idées" },
+  ]
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:px-8">
-        <a href="#accueil" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <span className="text-sm font-bold text-primary-foreground">MH</span>
-          </div>
-          <span className="text-lg font-semibold tracking-tight text-foreground">
-            Montpellier Horizon
-          </span>
-        </a>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center space-x-2">
+            <span className="font-bold sm:inline-block">Montpellier Horizon</span>
+          </Link>
+        </div>
 
-        <nav className="hidden items-center gap-1 md:flex">
-          {navItems.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+        {/* Navigation Desktop */}
+        <nav className="hidden md:flex items-center gap-6">
+          {routes.map((route) => (
+            <Link
+              key={route.href}
+              href={route.href}
+              className={`text-sm font-medium transition-colors hover:text-primary ${
+                pathname === route.href ? "text-foreground" : "text-foreground/60"
+              }`}
             >
-              {item.label}
-            </a>
+              {route.label}
+            </Link>
           ))}
-          <Button size="sm" className="ml-3" asChild>
-            <a href="#deposer">{"S'exprimer"}</a>
-          </Button>
+          
+          {/* Bouton Dynamique : Connexion ou Dashboard */}
+          {user ? (
+            <Button variant="default" size="sm" asChild>
+              <Link href="/admin/dashboard">
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                Dashboard
+              </Link>
+            </Button>
+          ) : (
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/login">
+                <User className="mr-2 h-4 w-4" />
+                Se connecter
+              </Link>
+            </Button>
+          )}
         </nav>
 
-        <button
-          type="button"
-          className="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground md:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Ouvrir le menu"
-        >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        {/* Menu Mobile (Hamburger) */}
+        <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
+          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
 
-      {mobileOpen && (
-        <div className="border-t border-border bg-background px-4 pb-4 pt-2 md:hidden">
-          <nav className="flex flex-col gap-1">
-            {navItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                onClick={() => setMobileOpen(false)}
-              >
-                {item.label}
-              </a>
-            ))}
-            <Button size="sm" className="mt-2" asChild>
-              <a href="#deposer" onClick={() => setMobileOpen(false)}>
-                {"S'exprimer"}
-              </a>
-            </Button>
-          </nav>
+      {/* Mobile Nav Content */}
+      {isOpen && (
+        <div className="md:hidden border-t p-4 space-y-4 bg-background">
+          {routes.map((route) => (
+            <Link
+              key={route.href}
+              href={route.href}
+              onClick={() => setIsOpen(false)}
+              className="block text-sm font-medium"
+            >
+              {route.label}
+            </Link>
+          ))}
+          <div className="pt-4 border-t">
+            {user ? (
+              <Button className="w-full" asChild>
+                <Link href="/admin/dashboard">Accéder au Dashboard</Link>
+              </Button>
+            ) : (
+              <Button className="w-full" variant="outline" asChild>
+                <Link href="/login">Se connecter</Link>
+              </Button>
+            )}
+          </div>
         </div>
       )}
     </header>
