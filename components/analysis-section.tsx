@@ -1,114 +1,100 @@
 "use client"
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
+import { useEffect, useState } from "react"
+import { supabase } from "@/lib/supabase"
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
 import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Loader2, TrendingUp, MapPin, Users } from "lucide-react"
 
-const themeData = [
-  { name: "Lieux de culte", value: 28, color: "hsl(162, 92%, 20%)" },
-  { name: "Carrés confessionnels", value: 22, color: "hsl(43, 74%, 50%)" },
-  { name: "Lutte contre l'islamophobie", value: 18, color: "hsl(230, 60%, 55%)" },
-  { name: "Éducation", value: 15, color: "hsl(200, 70%, 50%)" },
-  { name: "Commerce local", value: 10, color: "hsl(25, 87%, 55%)" },
-  { name: "Jeunesse", value: 7, color: "hsl(340, 65%, 55%)" },
-]
-
-const priorities = [
-  "Création de carrés confessionnels dans les cimetières municipaux",
-  "Agrandissement et mise aux normes des salles de prière existantes",
-  "Observatoire local de lutte contre l'islamophobie",
-  "Programme de soutien scolaire dans les quartiers prioritaires",
-  "Espaces polyvalents pour la jeunesse dans chaque quartier",
-  "Marché local hebdomadaire de produits halal et bio",
-  "Médiation interculturelle dans les services publics",
-  "Accompagnement juridique pour les victimes de discriminations",
-  "Aide à la création d'entreprises dans les quartiers",
-  "Ateliers numériques pour les jeunes de 12 à 25 ans",
-]
+// Couleurs Hexadécimales pour le graphique
+const THEME_HEX_COLORS: Record<string, string> = {
+  "Lieu de culte": "#4f46e5", // Indigo
+  "Lutte contre l'islamophobie": "#dc2626", // Rouge
+  "Jeunesse": "#059669", // Vert
+  "Économique et Social": "#d97706", // Orange
+}
 
 export function AnalysisSection() {
+  const [loading, setLoading] = useState(true)
+  const [total, setTotal] = useState(0)
+  const [topZone, setTopZone] = useState("En attente")
+  const [themeData, setThemeData] = useState<any[]>([])
+
+  useEffect(() => {
+    fetchStats()
+  }, [])
+
+  const fetchStats = async () => {
+    const { data } = await supabase.from('proposals').select('thematic, zone')
+    
+    if (data && data.length > 0) {
+      setTotal(data.length)
+      const themesCount = data.reduce((acc: any, curr) => {
+        acc[curr.thematic] = (acc[curr.thematic] || 0) + 1
+        return acc
+      }, {})
+
+      const formattedThemes = Object.keys(themesCount).map((key) => ({
+        name: key,
+        value: themesCount[key],
+        color: THEME_HEX_COLORS[key] || "#94a3b8" // Gris par défaut
+      }))
+      setThemeData(formattedThemes)
+
+      const zonesCount = data.reduce((acc: any, curr) => {
+        acc[curr.zone] = (acc[curr.zone] || 0) + 1
+        return acc
+      }, {})
+      
+      const topZ = Object.keys(zonesCount).reduce((a, b) => zonesCount[a] > zonesCount[b] ? a : b)
+      setTopZone(topZ)
+    }
+    setLoading(false)
+  }
+
+  if (loading) return <div className="py-20 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary"/></div>
+  if (total === 0) return <div className="text-center py-20 text-muted-foreground">Aucune donnée pour le moment.</div>
+
   return (
-    <section id="consultations" className="bg-background px-4 py-16 lg:px-8">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-10 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">
-            Synthèse pour les candidats
-          </h2>
-          <p className="mt-2 text-muted-foreground">
-            Données agrégées et anonymisées, prêtes à être présentées aux décideurs.
-          </p>
-        </div>
-
-        <div className="grid gap-8 lg:grid-cols-2">
-          {/* Pie Chart */}
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h3 className="mb-4 text-lg font-semibold text-card-foreground">
-              Répartition par thématique
-            </h3>
-            <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={themeData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={3}
-                    dataKey="value"
-                    stroke="none"
-                  >
-                    {themeData.map((entry) => (
-                      <Cell key={entry.name} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value: number) => [`${value}%`, "Part"]}
-                    contentStyle={{
-                      borderRadius: "8px",
-                      border: "1px solid hsl(var(--border))",
-                      background: "hsl(var(--card))",
-                      fontSize: "13px",
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {themeData.map((item) => (
-                <div key={item.name} className="flex items-center gap-1.5">
-                  <div
-                    className="h-3 w-3 rounded-sm"
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <span className="text-xs text-muted-foreground">
-                    {item.name} ({item.value}%)
-                  </span>
-                </div>
-              ))}
-            </div>
+    <div className="grid gap-8 lg:grid-cols-3">
+      <Card className="lg:col-span-1 border-none shadow-none bg-transparent">
+        <CardHeader className="px-0 pt-0">
+          <CardTitle className="flex items-center gap-2"><TrendingUp className="w-5 h-5 text-primary"/> Tendances</CardTitle>
+          <CardDescription>Indicateurs en temps réel</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4 px-0">
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+             <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 text-blue-700 rounded-full"><Users className="w-5 h-5"/></div>
+                <div><p className="text-sm text-muted-foreground">Contributions</p><p className="text-2xl font-bold">{total}</p></div>
+             </div>
           </div>
-
-          {/* Priorities */}
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h3 className="mb-4 text-lg font-semibold text-card-foreground">
-              10 Priorités Citoyennes
-            </h3>
-            <ol className="flex flex-col gap-3">
-              {priorities.map((p, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <Badge
-                    variant="outline"
-                    className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-primary/30 bg-primary/5 text-xs font-bold text-primary"
-                  >
-                    {i + 1}
-                  </Badge>
-                  <span className="text-sm leading-relaxed text-card-foreground">{p}</span>
-                </li>
-              ))}
-            </ol>
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+             <div className="flex items-center gap-3">
+                <div className="p-2 bg-orange-100 text-orange-700 rounded-full"><MapPin className="w-5 h-5"/></div>
+                <div><p className="text-sm text-muted-foreground">Zone active</p><p className="text-xl font-bold text-orange-600">{topZone}</p></div>
+             </div>
           </div>
-        </div>
-      </div>
-    </section>
+        </CardContent>
+      </Card>
+
+      <Card className="lg:col-span-2 border-none shadow-none bg-transparent">
+        <CardHeader className="px-0 pt-0">
+          <CardTitle>Répartition par thèmes</CardTitle>
+        </CardHeader>
+        <CardContent className="h-[350px] px-0">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={themeData} cx="50%" cy="50%" innerRadius={80} outerRadius={120} paddingAngle={5} dataKey="value">
+                {themeData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />)}
+              </Pie>
+              <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }} />
+              <Legend verticalAlign="bottom" height={36} iconType="circle"/>
+            </PieChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

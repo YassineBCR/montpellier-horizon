@@ -1,40 +1,37 @@
-import { ArrowRight } from "lucide-react"
+import Link from "next/link"
+import { ArrowRight, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function HeroSection() {
   return (
-    <section
-      id="accueil"
-      className="relative overflow-hidden bg-background px-4 py-24 lg:px-8 lg:py-32"
-    >
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute right-0 top-0 h-[500px] w-[500px] -translate-y-1/4 translate-x-1/4 rounded-full bg-primary/5" />
-        <div className="absolute bottom-0 left-0 h-[400px] w-[400px] translate-y-1/4 -translate-x-1/4 rounded-full bg-accent/5" />
+    <div className="flex flex-col items-center max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+      <div className="inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium text-primary bg-primary/5 mb-4 hover:bg-primary/10 transition-colors">
+        <Sparkles className="mr-2 h-4 w-4" />
+        Une nouvelle ère pour Montpellier
       </div>
-
-      <div className="mx-auto max-w-3xl text-center">
-        <span className="mb-6 inline-block rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-medium tracking-wide text-primary">
-          Municipales Montpellier
-        </span>
-        <h1 className="text-balance text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl lg:text-6xl">
-          Votre voix construit le Montpellier de demain
-        </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground">
-          Collectons, structurons et présentons nos besoins aux candidats des
-          municipales. Une plateforme citoyenne ouverte et transparente.
-        </p>
-        <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Button size="lg" asChild>
-            <a href="#deposer">
-              {"S'exprimer"}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </a>
-          </Button>
-          <Button variant="outline" size="lg" asChild>
-            <a href="#propositions">Voir les propositions</a>
-          </Button>
-        </div>
+      
+      <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter leading-tight text-center bg-clip-text text-transparent bg-gradient-to-b from-gray-900 to-gray-700">
+        Réinventons la ville,<br /> 
+        <span className="text-primary bg-clip-text bg-gradient-to-r from-primary to-blue-600">quartier par quartier.</span>
+      </h1>
+      
+      <p className="text-xl text-muted-foreground text-center max-w-2xl mx-auto leading-relaxed">
+        Loin des promesses électorales, construisons ensemble un avenir concret. 
+        Votre voix est le point de départ du changement.
+      </p>
+      
+      <div className="flex flex-wrap justify-center gap-4 pt-4">
+        <Button asChild size="lg" className="h-12 px-8 text-base rounded-full shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all hover:scale-105">
+          <Link href="/#propose">
+            Proposer une idée <ArrowRight className="ml-2 h-5 w-5" />
+          </Link>
+        </Button>
+        <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base rounded-full border-2 hover:bg-gray-50 transition-all hover:scale-105">
+          <Link href="/#manifesto">
+            Lire le manifeste
+          </Link>
+        </Button>
       </div>
-    </section>
+    </div>
   )
 }

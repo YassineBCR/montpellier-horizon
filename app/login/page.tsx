@@ -16,27 +16,24 @@ export default function AuthPage() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   
-  // États
+  // Champs du formulaire
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [pseudo, setPseudo] = useState("")
 
-  // --- LOGIN ---
+  // --- CONNEXION ---
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     
-    const { error } = await supabase.auth.signInWithPassword({ 
-      email, 
-      password 
-    })
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
     
     if (error) {
-      toast({ title: "Erreur de connexion", description: error.message, variant: "destructive" })
+      toast({ title: "Erreur", description: "Email ou mot de passe incorrect.", variant: "destructive" })
     } else {
       toast({ title: "Succès", description: "Connexion réussie." })
-      router.push("/admin/dashboard")
       router.refresh()
+      router.push("/admin/dashboard")
     }
     setLoading(false)
   }
@@ -46,25 +43,23 @@ export default function AuthPage() {
     e.preventDefault()
     setLoading(true)
     
-    // On crée juste le compte Auth. 
-    // Le Trigger SQL s'occupe de créer le profil admin automatiquement.
+    // Le Trigger SQL s'occupera de créer le profil Admin automatiquement
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: pseudo } // Ce champ sera récupéré par le trigger SQL
+        data: { full_name: pseudo } // Envoi du pseudo pour le SQL
       }
     })
 
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" })
     } else {
-      // Si l'option "Confirm Email" est désactivée, l'utilisateur est connecté direct
+      // Connexion directe car confirmation email désactivée
       if (data.session) {
-        toast({ title: "Compte créé !", description: "Vous êtes connecté." })
+        toast({ title: "Compte créé !", description: "Bienvenue sur le dashboard." })
+        router.refresh()
         router.push("/admin/dashboard")
-      } else {
-        toast({ title: "Vérifiez vos mails", description: "Un lien de confirmation a été envoyé." })
       }
     }
     
@@ -76,10 +71,10 @@ export default function AuthPage() {
       <Tabs defaultValue="login" className="w-full max-w-md">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="login">Connexion</TabsTrigger>
-          <TabsTrigger value="register">Créer un compte</TabsTrigger>
+          <TabsTrigger value="register">Inscription</TabsTrigger>
         </TabsList>
         
-        {/* LOGIN FORM */}
+        {/* LOGIN */}
         <TabsContent value="login">
           <Card>
             <CardHeader>
@@ -107,17 +102,17 @@ export default function AuthPage() {
           </Card>
         </TabsContent>
 
-        {/* REGISTER FORM */}
+        {/* REGISTER */}
         <TabsContent value="register">
           <Card>
             <CardHeader>
-              <CardTitle>Inscription</CardTitle>
-              <CardDescription>Nouveau compte administrateur.</CardDescription>
+              <CardTitle>Nouvel Admin</CardTitle>
+              <CardDescription>Créez votre compte administrateur.</CardDescription>
             </CardHeader>
             <form onSubmit={handleSignUp}>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Pseudo / Nom</Label>
+                  <Label>Pseudo</Label>
                   <Input required onChange={(e) => setPseudo(e.target.value)} />
                 </div>
                 <div className="space-y-2">
