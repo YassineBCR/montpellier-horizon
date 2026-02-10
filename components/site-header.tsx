@@ -19,7 +19,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
       <div className="container flex h-14 items-center justify-between">
-        <Link href="/" className="font-bold text-lg">Montpellier Horizon</Link>
+        <Link href="/" className="font-bold text-lg">Montpellier Votre voix </Link>
         
         {/* Menu Desktop */}
         <nav className="hidden md:flex items-center gap-6">
