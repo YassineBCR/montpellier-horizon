@@ -1,127 +1,315 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
-import { Send, MapPin, ArrowRight, CheckCircle2, Type, FileText } from "lucide-react"
+import { Check, ChevronRight, ChevronLeft, Send } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+
+const themes = [
+  { value: "culte", label: "Lieux de culte", icon: "🕌" },
+  { value: "education", label: "Éducation", icon: "📚" },
+  { value: "carres", label: "Carrés confessionnels", icon: "🌿" },
+  { value: "jeunesse", label: "Jeunesse", icon: "🤝" },
+  { value: "islamophobie", label: "Lutte contre l'islamophobie", icon: "🛡️" },
+  { value: "commerce", label: "Commerce local", icon: "🏪" },
+]
+
+const quartiers = [
+  "Mosson",
+  "Paillade",
+  "Centre",
+  "Port Marianne",
+  "Aiguelongue",
+  "Les Cévennes",
+  "Hôpitaux-Facultés",
+  "Antigone",
+  "Figuerolles",
+  "Croix d'Argent",
+]
+
+const steps = [
+  { label: "Thématique", short: "Thème" },
+  { label: "Description", short: "Détail" },
+  { label: "Localisation", short: "Lieu" },
+  { label: "Validation", short: "Envoi" },
+]
 
 export function ProposalForm() {
-  const [step, setStep] = useState(1)
-  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [step, setStep] = useState(0)
+  const [submitted, setSubmitted] = useState(false)
+  const [form, setForm] = useState({
+    theme: "",
+    title: "",
+    description: "",
+    quartier: "",
+    email: "",
+    anonymous: true,
+  })
 
-  // États pour stocker les valeurs (optionnel pour le moment, mais utile pour la suite)
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
+  function next() {
+    if (step < 3) setStep(step + 1)
+  }
+  function prev() {
+    if (step > 0) setStep(step - 1)
+  }
 
-  const handleNext = () => setStep(step + 1)
-  const handleSubmit = () => setIsSubmitted(true)
+  function canNext() {
+    if (step === 0) return form.theme !== ""
+    if (step === 1) return form.title.trim() !== "" && form.description.trim() !== ""
+    if (step === 2) return form.quartier !== ""
+    return true
+  }
 
-  if (isSubmitted) {
+  function handleSubmit() {
+    setSubmitted(true)
+  }
+
+  if (submitted) {
     return (
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.9 }} 
-        animate={{ opacity: 1, scale: 1 }}
-        className="glass-panel p-8 rounded-3xl text-center h-full flex flex-col items-center justify-center"
-      >
-        <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-          <CheckCircle2 className="w-10 h-10 text-emerald-600" />
+      <section id="deposer" className="bg-secondary px-4 py-16 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+            <Check className="h-8 w-8 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground">Merci pour votre contribution !</h2>
+          <p className="mt-2 text-muted-foreground">
+            Votre proposition a bien été enregistrée et sera visible dans le flux communautaire.
+          </p>
+          <Button
+            className="mt-6"
+            onClick={() => {
+              setSubmitted(false)
+              setStep(0)
+              setForm({
+                theme: "",
+                title: "",
+                description: "",
+                quartier: "",
+                email: "",
+                anonymous: true,
+              })
+            }}
+          >
+            Soumettre une autre idée
+          </Button>
         </div>
-        <h3 className="text-2xl font-bold text-gray-800">C'est noté !</h3>
-        <p className="text-gray-600 mt-2">Votre proposition "{title}" a été ajoutée à la synthèse.</p>
-        <button onClick={() => {setIsSubmitted(false); setStep(1); setTitle(""); setDescription("")}} className="mt-6 text-emerald-600 font-medium hover:underline">
-          Nouvelle idée
-        </button>
-      </motion.div>
+      </section>
     )
   }
 
   return (
-    <div className="glass-panel p-6 rounded-3xl shadow-sm relative overflow-hidden flex flex-col h-full">
-      {/* Barre de progression */}
-      <div className="flex gap-2 mb-8">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step >= i ? 'bg-emerald-500' : 'bg-gray-200'}`} />
-        ))}
-      </div>
+    <section id="deposer" className="bg-secondary px-4 py-16 lg:px-8">
+      <div className="mx-auto max-w-2xl">
+        <div className="mb-10 text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground">
+            Déposer une proposition
+          </h2>
+          <p className="mt-2 text-muted-foreground">
+            Partagez votre idée en quelques étapes simples.
+          </p>
+        </div>
 
-      <div className="flex-1">
-        {/* ÉTAPE 1 : CATÉGORIE */}
-        {step === 1 && (
-          <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-4">
-            <label className="block text-lg font-semibold text-gray-700">Quelle est la thématique ?</label>
-            <div className="grid grid-cols-2 gap-3">
-              {['Lieux de Culte', 'Éducation', 'Jeunesse', 'Commerce', 'Social', 'Autre'].map((cat) => (
-                <button key={cat} onClick={handleNext} className="p-3 rounded-xl border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 text-left transition-all text-sm font-medium group">
-                  <span className="group-hover:translate-x-1 transition-transform inline-block">{cat}</span>
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
+        {/* Stepper */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between">
+            {steps.map((s, i) => (
+              <div key={s.label} className="flex flex-1 items-center">
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
+                      i < step
+                        ? "bg-primary text-primary-foreground"
+                        : i === step
+                          ? "bg-primary text-primary-foreground ring-4 ring-primary/20"
+                          : "bg-border text-muted-foreground"
+                    }`}
+                  >
+                    {i < step ? <Check className="h-4 w-4" /> : i + 1}
+                  </div>
+                  <span className="mt-1.5 text-xs font-medium text-muted-foreground hidden sm:block">
+                    {s.label}
+                  </span>
+                  <span className="mt-1.5 text-xs font-medium text-muted-foreground sm:hidden">
+                    {s.short}
+                  </span>
+                </div>
+                {i < steps.length - 1 && (
+                  <div
+                    className={`mx-2 h-0.5 flex-1 rounded ${
+                      i < step ? "bg-primary" : "bg-border"
+                    }`}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
 
-        {/* ÉTAPE 2 : TITRE ET DESCRIPTION (MODIFIÉE) */}
-        {step === 2 && (
-          <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-5">
-            
-            {/* Champ Titre */}
+        <div className="rounded-xl border border-border bg-card p-6 sm:p-8">
+          {/* Step 0 - Theme */}
+          {step === 0 && (
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <Type size={16} className="text-emerald-600"/> Titre de l'idée
-              </label>
-              <input 
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-emerald-500 font-bold text-gray-800 placeholder:font-normal"
-                placeholder="Ex: Une nouvelle bibliothèque à la Mosson..."
-                autoFocus
-              />
+              <h3 className="mb-4 text-lg font-semibold text-card-foreground">
+                Choisissez une thématique
+              </h3>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {themes.map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => setForm({ ...form, theme: t.value })}
+                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 text-center transition-colors ${
+                      form.theme === t.value
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/40"
+                    }`}
+                  >
+                    <span className="text-2xl">{t.icon}</span>
+                    <span className="text-sm font-medium text-card-foreground">{t.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
+          )}
 
-            {/* Champ Description */}
+          {/* Step 1 - Title & Description */}
+          {step === 1 && (
+            <div className="flex flex-col gap-5">
+              <h3 className="text-lg font-semibold text-card-foreground">
+                Décrivez votre proposition
+              </h3>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="title">Titre de la proposition</Label>
+                <Input
+                  id="title"
+                  placeholder="Ex: Création d'un espace culturel..."
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="description">Description détaillée</Label>
+                <Textarea
+                  id="description"
+                  rows={5}
+                  placeholder="Expliquez votre idée en détail : contexte, objectifs, bénéfices attendus..."
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Step 2 - Location */}
+          {step === 2 && (
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <FileText size={16} className="text-emerald-600"/> Description détaillée
-              </label>
-              <textarea 
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-emerald-500 h-24 resize-none"
-                placeholder="Expliquez pourquoi c'est important et comment le mettre en place..."
-              ></textarea>
+              <h3 className="mb-4 text-lg font-semibold text-card-foreground">
+                Quartier concerné
+              </h3>
+              <RadioGroup
+                value={form.quartier}
+                onValueChange={(v) => setForm({ ...form, quartier: v })}
+                className="grid grid-cols-2 gap-3"
+              >
+                {quartiers.map((q) => (
+                  <Label
+                    key={q}
+                    htmlFor={`q-${q}`}
+                    className={`flex cursor-pointer items-center gap-3 rounded-lg border-2 p-3 transition-colors ${
+                      form.quartier === q
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/40"
+                    }`}
+                  >
+                    <RadioGroupItem value={q} id={`q-${q}`} />
+                    <span className="text-sm font-medium text-card-foreground">{q}</span>
+                  </Label>
+                ))}
+              </RadioGroup>
             </div>
+          )}
 
-            <button onClick={handleNext} className="w-full py-3 bg-black text-white rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors">
-              Suivant <ArrowRight size={18} />
-            </button>
-          </motion.div>
-        )}
+          {/* Step 3 - Validation */}
+          {step === 3 && (
+            <div className="flex flex-col gap-5">
+              <h3 className="text-lg font-semibold text-card-foreground">Validation</h3>
+              <div className="flex flex-col gap-3">
+                <Label className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    name="validation"
+                    checked={form.anonymous}
+                    onChange={() => setForm({ ...form, anonymous: true, email: "" })}
+                    className="accent-[hsl(var(--primary))]"
+                  />
+                  <span className="text-sm text-card-foreground">Soumettre anonymement</span>
+                </Label>
+                <Label className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    name="validation"
+                    checked={!form.anonymous}
+                    onChange={() => setForm({ ...form, anonymous: false })}
+                    className="accent-[hsl(var(--primary))]"
+                  />
+                  <span className="text-sm text-card-foreground">Soumettre avec mon email</span>
+                </Label>
+              </div>
+              {!form.anonymous && (
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="email">Adresse email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="votre@email.com"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  />
+                </div>
+              )}
+              <div className="rounded-lg border border-border bg-secondary p-4">
+                <h4 className="mb-2 text-sm font-semibold text-card-foreground">Récapitulatif</h4>
+                <dl className="flex flex-col gap-1 text-sm text-muted-foreground">
+                  <div className="flex gap-2">
+                    <dt className="font-medium text-foreground">Thème :</dt>
+                    <dd>{themes.find((t) => t.value === form.theme)?.label}</dd>
+                  </div>
+                  <div className="flex gap-2">
+                    <dt className="font-medium text-foreground">Titre :</dt>
+                    <dd>{form.title}</dd>
+                  </div>
+                  <div className="flex gap-2">
+                    <dt className="font-medium text-foreground">Quartier :</dt>
+                    <dd>{form.quartier}</dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+          )}
 
-        {/* ÉTAPE 3 : LOCALISATION */}
-        {step === 3 && (
-          <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-4">
-            <label className="block text-lg font-semibold text-gray-700">Pour quel quartier ?</label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              <select className="w-full p-4 pl-10 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-emerald-500 appearance-none cursor-pointer">
-                <option>La Mosson / Paillade</option>
-                <option>Centre Écusson</option>
-                <option>Port Marianne</option>
-                <option>Petit Bard / Pergola</option>
-                <option>Cévennes</option>
-                <option>Prés d'Arènes</option>
-                <option>Autre / Toute la ville</option>
-              </select>
-            </div>
-            
-            <div className="pt-4">
-               <button onClick={handleSubmit} className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all transform hover:-translate-y-1">
-                <Send size={18} /> Envoyer ma proposition
-              </button>
-              <p className="text-xs text-center text-gray-400 mt-3">Votre contribution restera anonyme.</p>
-            </div>
-          </motion.div>
-        )}
+          {/* Navigation */}
+          <div className="mt-6 flex items-center justify-between">
+            <Button variant="outline" onClick={prev} disabled={step === 0} className="gap-1.5 bg-transparent">
+              <ChevronLeft className="h-4 w-4" />
+              Précédent
+            </Button>
+            {step < 3 ? (
+              <Button onClick={next} disabled={!canNext()} className="gap-1.5">
+                Suivant
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button onClick={handleSubmit} className="gap-1.5">
+                <Send className="h-4 w-4" />
+                Soumettre
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   )
 }
