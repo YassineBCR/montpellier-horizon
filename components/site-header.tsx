@@ -1,77 +1,70 @@
-"use client"
-
-import { useState } from "react"
-import { Menu, X } from "lucide-react"
+// components/site-header.tsx
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { createClient } from "@/lib/supabase"
+import { LayoutDashboard, LogIn, User, LogOut } from "lucide-react"
+import { logout } from "@/app/login/actions"
 
-const navItems = [
-  { label: "Accueil", href: "#accueil" },
-  { label: "Propositions", href: "#propositions" },
-  { label: "Consultations", href: "#consultations" },
-  { label: "Manifeste", href: "#manifeste" },
-]
+export async function SiteHeader() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-export function SiteHeader() {
-  const [mobileOpen, setMobileOpen] = useState(false)
+  // Vérification du rôle UNIQUEMENT si connecté
+  let isAdmin = false
+  if (user) {
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+    isAdmin = profile?.role === 'admin'
+  }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:px-8">
-        <a href="#accueil" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <span className="text-sm font-bold text-primary-foreground">MH</span>
-          </div>
-          <span className="text-lg font-semibold tracking-tight text-foreground">
-            Montpellier Horizon
-          </span>
-        </a>
-
-        <nav className="hidden items-center gap-1 md:flex">
-          {navItems.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {item.label}
-            </a>
-          ))}
-          <Button size="sm" className="ml-3" asChild>
-            <a href="#deposer">{"S'exprimer"}</a>
-          </Button>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between px-4">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 font-bold text-xl md:text-2xl hover:opacity-80 transition-opacity">
+           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">M</div>
+           <span className="hidden sm:inline">Montpellier<span className="text-primary">Horizon</span></span>
+        </Link>
+        
+        {/* Navigation */}
+        <nav className="flex items-center gap-3 md:gap-4">
+          {user ? (
+            <>
+              {/* Bouton Admin - Visible uniquement si Admin */}
+              {isAdmin && (
+                <Button variant="default" size="sm" asChild className="hidden md:flex shadow-sm bg-purple-600 hover:bg-purple-700 text-white">
+                  <Link href="/dashboard"><LayoutDashboard className="w-4 h-4 mr-2"/> Admin</Link>
+                </Button>
+              )}
+              
+              <div className="flex items-center gap-2 pl-2 md:pl-4 md:border-l">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                    <div className="bg-muted p-1.5 rounded-full"><User className="w-4 h-4"/></div>
+                    <span className="hidden md:inline-block max-w-[100px] truncate">{user.email?.split('@')[0]}</span>
+                </div>
+                
+                <form action={logout}>
+                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" title="Se déconnecter">
+                        <LogOut className="w-4 h-4"/>
+                    </Button>
+                </form>
+              </div>
+            </>
+          ) : (
+            <div className="flex gap-2">
+                <Button variant="ghost" size="sm" asChild className="hidden sm:flex">
+                <Link href="/login">Inscription</Link>
+                </Button>
+                <Button size="sm" asChild>
+                <Link href="/login"><LogIn className="w-4 h-4 mr-2"/> Connexion</Link>
+                </Button>
+            </div>
+          )}
         </nav>
-
-        <button
-          type="button"
-          className="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground md:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Ouvrir le menu"
-        >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
       </div>
-
-      {mobileOpen && (
-        <div className="border-t border-border bg-background px-4 pb-4 pt-2 md:hidden">
-          <nav className="flex flex-col gap-1">
-            {navItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                onClick={() => setMobileOpen(false)}
-              >
-                {item.label}
-              </a>
-            ))}
-            <Button size="sm" className="mt-2" asChild>
-              <a href="#deposer" onClick={() => setMobileOpen(false)}>
-                {"S'exprimer"}
-              </a>
-            </Button>
-          </nav>
-        </div>
-      )}
     </header>
   )
 }

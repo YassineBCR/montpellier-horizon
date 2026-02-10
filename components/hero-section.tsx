@@ -1,40 +1,43 @@
-import { ArrowRight } from "lucide-react"
+// components/hero-section.tsx
 import { Button } from "@/components/ui/button"
+import { ArrowRight } from "lucide-react"
+import Link from "next/link"
 
 export function HeroSection() {
   return (
-    <section
-      id="accueil"
-      className="relative overflow-hidden bg-background px-4 py-24 lg:px-8 lg:py-32"
-    >
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute right-0 top-0 h-[500px] w-[500px] -translate-y-1/4 translate-x-1/4 rounded-full bg-primary/5" />
-        <div className="absolute bottom-0 left-0 h-[400px] w-[400px] translate-y-1/4 -translate-x-1/4 rounded-full bg-accent/5" />
-      </div>
+    <section className="relative py-20 md:py-32 overflow-hidden">
+      <div className="container px-4 md:px-6 relative z-10 flex flex-col items-center text-center space-y-8">
+        
+        <div className="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-muted/50 backdrop-blur-sm mb-4">
+          <span className="flex h-2 w-2 rounded-full bg-green-500 mr-2"></span>
+          Concertation citoyenne 2024 active
+        </div>
 
-      <div className="mx-auto max-w-3xl text-center">
-        <span className="mb-6 inline-block rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-medium tracking-wide text-primary">
-          Municipales Montpellier
-        </span>
-        <h1 className="text-balance text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl lg:text-6xl">
-          Votre voix construit le Montpellier de demain
+        <h1 className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl max-w-4xl bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-gray-400">
+          Construisons ensemble le <br className="hidden sm:inline" />
+          <span className="text-primary">Montpellier de demain</span>
         </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground">
-          Collectons, structurons et présentons nos besoins aux candidats des
-          municipales. Une plateforme citoyenne ouverte et transparente.
+        
+        <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl leading-relaxed">
+          Une plateforme transparente pour proposer, débattre et valider les projets qui transformeront nos quartiers.
         </p>
-        <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Button size="lg" asChild>
-            <a href="#deposer">
-              {"S'exprimer"}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </a>
+        
+        <div className="flex flex-col sm:flex-row gap-4 w-full justify-center pt-4">
+          <Button size="lg" className="h-12 px-8 text-base shadow-lg hover:shadow-xl transition-all" asChild>
+            <Link href="#participer">
+              Proposer une idée <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </Button>
-          <Button variant="outline" size="lg" asChild>
-            <a href="#propositions">Voir les propositions</a>
+          <Button size="lg" variant="outline" className="h-12 px-8 text-base bg-background/50 backdrop-blur-sm" asChild>
+            <Link href="#explorer">
+              Voir les propositions
+            </Link>
           </Button>
         </div>
       </div>
+      
+      {/* Élément décoratif d'arrière-plan */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-primary/5 rounded-full blur-3xl -z-10" />
     </section>
   )
 }
