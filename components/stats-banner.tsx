@@ -1,29 +1,39 @@
-// components/stats-banner.tsx
-import { Users, Lightbulb, CheckCircle2 } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import { FileText, Users, LayoutGrid } from "lucide-react"
+
+const stats = [
+  {
+    label: "Contributions",
+    value: "847",
+    icon: FileText,
+  },
+  {
+    label: "Citoyens engagés",
+    value: "1 243",
+    icon: Users,
+  },
+  {
+    label: "Thématiques analysées",
+    value: "6",
+    icon: LayoutGrid,
+  },
+]
 
 export function StatsBanner() {
-  const stats = [
-    { label: "Citoyens engagés", value: "2,450+", icon: Users, color: "text-blue-500" },
-    { label: "Idées proposées", value: "142", icon: Lightbulb, color: "text-yellow-500" },
-    { label: "Projets validés", value: "89", icon: CheckCircle2, color: "text-green-500" },
-  ]
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {stats.map((stat, i) => (
-        <Card key={i} className="border-none shadow-none bg-transparent md:bg-background/50 md:border md:shadow-sm">
-          <CardContent className="flex items-center gap-4 p-6">
-            <div className={`p-3 rounded-full bg-background border shadow-sm ${stat.color}`}>
-              <stat.icon className="w-6 h-6" />
+    <section className="border-y border-border bg-secondary px-4 py-12 lg:px-8">
+      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 sm:grid-cols-3">
+        {stats.map((stat) => (
+          <div key={stat.label} className="flex flex-col items-center gap-2 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+              <stat.icon className="h-6 w-6 text-primary" />
             </div>
-            <div>
-              <div className="text-3xl font-bold tracking-tight">{stat.value}</div>
-              <p className="text-sm text-muted-foreground font-medium uppercase tracking-wide">{stat.label}</p>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+            <span className="mt-1 text-3xl font-bold tracking-tight text-foreground">
+              {stat.value}
+            </span>
+            <span className="text-sm font-medium text-muted-foreground">{stat.label}</span>
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }

@@ -1,171 +1,315 @@
-// components/proposal-form.tsx
 "use client"
 
 import { useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
+import { Check, ChevronRight, ChevronLeft, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { SECTORS, THEMES, SectorKey } from "@/lib/constants"
-import { toast } from "@/hooks/use-toast"
-import { submitProposal } from "@/lib/actions"
-import { ChevronRight, ChevronLeft, Send, MapPin, Hash, PenLine, User, Check } from "lucide-react"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
-const formSchema = z.object({
-  theme: z.string().min(1, "Requis"),
-  sector: z.string().min(1, "Requis"),
-  neighborhood: z.string().min(1, "Requis"),
-  title: z.string().min(5, "5 caractères min."),
-  content: z.string().min(20, "20 caractères min."),
-  isAnonymous: z.boolean().default(false),
-  email: z.string().email("Email invalide"),
-  pseudo: z.string().optional(),
-})
+const themes = [
+  { value: "culte", label: "Lieux de culte", icon: "🕌" },
+  { value: "education", label: "Éducation", icon: "📚" },
+  { value: "carres", label: "Carrés confessionnels", icon: "🌿" },
+  { value: "jeunesse", label: "Jeunesse", icon: "🤝" },
+  { value: "islamophobie", label: "Lutte contre l'islamophobie", icon: "🛡️" },
+  { value: "commerce", label: "Commerce local", icon: "🏪" },
+]
+
+const quartiers = [
+  "Mosson",
+  "Paillade",
+  "Centre",
+  "Port Marianne",
+  "Aiguelongue",
+  "Les Cévennes",
+  "Hôpitaux-Facultés",
+  "Antigone",
+  "Figuerolles",
+  "Croix d'Argent",
+]
+
+const steps = [
+  { label: "Thématique", short: "Thème" },
+  { label: "Description", short: "Détail" },
+  { label: "Localisation", short: "Lieu" },
+  { label: "Validation", short: "Envoi" },
+]
 
 export function ProposalForm() {
-  const [step, setStep] = useState(1)
-  const [selectedSector, setSelectedSector] = useState<SectorKey | "">("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { isAnonymous: false, neighborhood: "Ville Globale", title: "", content: "", email: "", pseudo: "", theme: "", sector: "" },
+  const [step, setStep] = useState(0)
+  const [submitted, setSubmitted] = useState(false)
+  const [form, setForm] = useState({
+    theme: "",
+    title: "",
+    description: "",
+    quartier: "",
+    email: "",
+    anonymous: true,
   })
 
-  const nextStep = async () => {
-    let isValid = false
-    if (step === 1) isValid = await form.trigger(["theme"])
-    if (step === 2) isValid = await form.trigger(["sector", "neighborhood"])
-    if (step === 3) isValid = await form.trigger(["title", "content"])
-    if (isValid) setStep(s => s + 1)
+  function next() {
+    if (step < 3) setStep(step + 1)
+  }
+  function prev() {
+    if (step > 0) setStep(step - 1)
   }
 
-  const prevStep = () => setStep(s => s - 1)
+  function canNext() {
+    if (step === 0) return form.theme !== ""
+    if (step === 1) return form.title.trim() !== "" && form.description.trim() !== ""
+    if (step === 2) return form.quartier !== ""
+    return true
+  }
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true)
-    try {
-      await submitProposal(values)
-      toast({ title: "Succès !", description: "Votre idée a été transmise aux modérateurs.", duration: 5000 })
-      form.reset(); setStep(1); setSelectedSector("")
-    } catch {
-      toast({ variant: "destructive", title: "Erreur", description: "Veuillez réessayer." })
-    } finally {
-      setIsSubmitting(false)
-    }
+  function handleSubmit() {
+    setSubmitted(true)
+  }
+
+  if (submitted) {
+    return (
+      <section id="deposer" className="bg-secondary px-4 py-16 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+            <Check className="h-8 w-8 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground">Merci pour votre contribution !</h2>
+          <p className="mt-2 text-muted-foreground">
+            Votre proposition a bien été enregistrée et sera visible dans le flux communautaire.
+          </p>
+          <Button
+            className="mt-6"
+            onClick={() => {
+              setSubmitted(false)
+              setStep(0)
+              setForm({
+                theme: "",
+                title: "",
+                description: "",
+                quartier: "",
+                email: "",
+                anonymous: true,
+              })
+            }}
+          >
+            Soumettre une autre idée
+          </Button>
+        </div>
+      </section>
+    )
   }
 
   return (
-    <Card className="w-full max-w-3xl mx-auto border shadow-xl overflow-hidden bg-background/80 backdrop-blur-sm">
-      <div className="h-2 bg-muted w-full"><div className="h-full bg-primary transition-all duration-500 ease-in-out" style={{ width: `${(step/4)*100}%` }} /></div>
-      
-      <CardHeader className="text-center pt-8 pb-2">
-        <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 text-primary">
-            {step === 1 && <Hash className="w-6 h-6"/>}
-            {step === 2 && <MapPin className="w-6 h-6"/>}
-            {step === 3 && <PenLine className="w-6 h-6"/>}
-            {step === 4 && <User className="w-6 h-6"/>}
+    <section id="deposer" className="bg-secondary px-4 py-16 lg:px-8">
+      <div className="mx-auto max-w-2xl">
+        <div className="mb-10 text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground">
+            Déposer une proposition
+          </h2>
+          <p className="mt-2 text-muted-foreground">
+            Partagez votre idée en quelques étapes simples.
+          </p>
         </div>
-        <CardTitle className="text-2xl">
-            {step === 1 && "Quelle est la thématique ?"}
-            {step === 2 && "Où cela se passe-t-il ?"}
-            {step === 3 && "Dites-nous tout"}
-            {step === 4 && "Derniers détails"}
-        </CardTitle>
-        <CardDescription>Étape {step} sur 4</CardDescription>
-      </CardHeader>
 
-      <CardContent className="p-6 md:p-10 min-h-[350px]">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            
-            {/* ETAPE 1 */}
-            {step === 1 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-right-8 duration-300">
-                {THEMES.map((theme) => (
-                  <div key={theme} onClick={() => form.setValue("theme", theme)}
-                    className={`cursor-pointer rounded-xl border-2 p-4 flex items-center justify-between hover:border-primary/50 transition-all ${form.watch("theme") === theme ? "border-primary bg-primary/5" : "border-muted"}`}>
-                    <span className="font-medium">{theme}</span>
-                    {form.watch("theme") === theme && <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center"><Check className="w-3 h-3 text-white"/></div>}
+        {/* Stepper */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between">
+            {steps.map((s, i) => (
+              <div key={s.label} className="flex flex-1 items-center">
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
+                      i < step
+                        ? "bg-primary text-primary-foreground"
+                        : i === step
+                          ? "bg-primary text-primary-foreground ring-4 ring-primary/20"
+                          : "bg-border text-muted-foreground"
+                    }`}
+                  >
+                    {i < step ? <Check className="h-4 w-4" /> : i + 1}
                   </div>
+                  <span className="mt-1.5 text-xs font-medium text-muted-foreground hidden sm:block">
+                    {s.label}
+                  </span>
+                  <span className="mt-1.5 text-xs font-medium text-muted-foreground sm:hidden">
+                    {s.short}
+                  </span>
+                </div>
+                {i < steps.length - 1 && (
+                  <div
+                    className={`mx-2 h-0.5 flex-1 rounded ${
+                      i < step ? "bg-primary" : "bg-border"
+                    }`}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-6 sm:p-8">
+          {/* Step 0 - Theme */}
+          {step === 0 && (
+            <div>
+              <h3 className="mb-4 text-lg font-semibold text-card-foreground">
+                Choisissez une thématique
+              </h3>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {themes.map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => setForm({ ...form, theme: t.value })}
+                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 text-center transition-colors ${
+                      form.theme === t.value
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/40"
+                    }`}
+                  >
+                    <span className="text-2xl">{t.icon}</span>
+                    <span className="text-sm font-medium text-card-foreground">{t.label}</span>
+                  </button>
                 ))}
               </div>
-            )}
+            </div>
+          )}
 
-            {/* ETAPE 2 */}
-            {step === 2 && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-300">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <FormField control={form.control} name="sector" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Secteur</FormLabel>
-                        <Select onValueChange={(v) => {field.onChange(v); setSelectedSector(v as SectorKey)}} defaultValue={field.value}>
-                          <FormControl><SelectTrigger className="h-12"><SelectValue placeholder="Choisir..." /></SelectTrigger></FormControl>
-                          <SelectContent>{Object.keys(SECTORS).map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                        </Select>
-                      </FormItem>
-                  )}/>
-                  <FormField control={form.control} name="neighborhood" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Quartier</FormLabel>
-                        <Select onValueChange={field.onChange} disabled={!selectedSector} value={field.value}>
-                          <FormControl><SelectTrigger className="h-12"><SelectValue placeholder="Choisir..." /></SelectTrigger></FormControl>
-                          <SelectContent>{selectedSector && SECTORS[selectedSector].map(q => <SelectItem key={q} value={q}>{q}</SelectItem>)}</SelectContent>
-                        </Select>
-                      </FormItem>
-                  )}/>
+          {/* Step 1 - Title & Description */}
+          {step === 1 && (
+            <div className="flex flex-col gap-5">
+              <h3 className="text-lg font-semibold text-card-foreground">
+                Décrivez votre proposition
+              </h3>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="title">Titre de la proposition</Label>
+                <Input
+                  id="title"
+                  placeholder="Ex: Création d'un espace culturel..."
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="description">Description détaillée</Label>
+                <Textarea
+                  id="description"
+                  rows={5}
+                  placeholder="Expliquez votre idée en détail : contexte, objectifs, bénéfices attendus..."
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Step 2 - Location */}
+          {step === 2 && (
+            <div>
+              <h3 className="mb-4 text-lg font-semibold text-card-foreground">
+                Quartier concerné
+              </h3>
+              <RadioGroup
+                value={form.quartier}
+                onValueChange={(v) => setForm({ ...form, quartier: v })}
+                className="grid grid-cols-2 gap-3"
+              >
+                {quartiers.map((q) => (
+                  <Label
+                    key={q}
+                    htmlFor={`q-${q}`}
+                    className={`flex cursor-pointer items-center gap-3 rounded-lg border-2 p-3 transition-colors ${
+                      form.quartier === q
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/40"
+                    }`}
+                  >
+                    <RadioGroupItem value={q} id={`q-${q}`} />
+                    <span className="text-sm font-medium text-card-foreground">{q}</span>
+                  </Label>
+                ))}
+              </RadioGroup>
+            </div>
+          )}
+
+          {/* Step 3 - Validation */}
+          {step === 3 && (
+            <div className="flex flex-col gap-5">
+              <h3 className="text-lg font-semibold text-card-foreground">Validation</h3>
+              <div className="flex flex-col gap-3">
+                <Label className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    name="validation"
+                    checked={form.anonymous}
+                    onChange={() => setForm({ ...form, anonymous: true, email: "" })}
+                    className="accent-[hsl(var(--primary))]"
+                  />
+                  <span className="text-sm text-card-foreground">Soumettre anonymement</span>
+                </Label>
+                <Label className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    name="validation"
+                    checked={!form.anonymous}
+                    onChange={() => setForm({ ...form, anonymous: false })}
+                    className="accent-[hsl(var(--primary))]"
+                  />
+                  <span className="text-sm text-card-foreground">Soumettre avec mon email</span>
+                </Label>
+              </div>
+              {!form.anonymous && (
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="email">Adresse email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="votre@email.com"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  />
                 </div>
+              )}
+              <div className="rounded-lg border border-border bg-secondary p-4">
+                <h4 className="mb-2 text-sm font-semibold text-card-foreground">Récapitulatif</h4>
+                <dl className="flex flex-col gap-1 text-sm text-muted-foreground">
+                  <div className="flex gap-2">
+                    <dt className="font-medium text-foreground">Thème :</dt>
+                    <dd>{themes.find((t) => t.value === form.theme)?.label}</dd>
+                  </div>
+                  <div className="flex gap-2">
+                    <dt className="font-medium text-foreground">Titre :</dt>
+                    <dd>{form.title}</dd>
+                  </div>
+                  <div className="flex gap-2">
+                    <dt className="font-medium text-foreground">Quartier :</dt>
+                    <dd>{form.quartier}</dd>
+                  </div>
+                </dl>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* ETAPE 3 */}
-            {step === 3 && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-300">
-                <FormField control={form.control} name="title" render={({ field }) => (
-                    <FormItem><FormLabel>Titre court</FormLabel><FormControl><Input placeholder="Ex: Rénovation parc..." className="h-12 text-lg" {...field} /></FormControl><FormMessage/></FormItem>
-                )}/>
-                <FormField control={form.control} name="content" render={({ field }) => (
-                    <FormItem><FormLabel>Description détaillée</FormLabel><FormControl><Textarea placeholder="Expliquez votre projet..." className="min-h-[150px] resize-none" {...field} /></FormControl><FormMessage/></FormItem>
-                )}/>
-              </div>
+          {/* Navigation */}
+          <div className="mt-6 flex items-center justify-between">
+            <Button variant="outline" onClick={prev} disabled={step === 0} className="gap-1.5 bg-transparent">
+              <ChevronLeft className="h-4 w-4" />
+              Précédent
+            </Button>
+            {step < 3 ? (
+              <Button onClick={next} disabled={!canNext()} className="gap-1.5">
+                Suivant
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button onClick={handleSubmit} className="gap-1.5">
+                <Send className="h-4 w-4" />
+                Soumettre
+              </Button>
             )}
-
-            {/* ETAPE 4 */}
-            {step === 4 && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-300">
-                <div className="bg-muted/30 p-6 rounded-xl space-y-4">
-                    <FormField control={form.control} name="isAnonymous" render={({ field }) => (
-                        <FormItem className="flex items-center justify-between p-2">
-                            <div className="space-y-0.5"><FormLabel>Anonyme</FormLabel><CardDescription>Masquer mon nom</CardDescription></div>
-                            <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                        </FormItem>
-                    )}/>
-                    {!form.watch("isAnonymous") && (
-                        <FormField control={form.control} name="pseudo" render={({ field }) => (
-                            <FormItem><FormLabel>Nom public</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
-                        )}/>
-                    )}
-                    <FormField control={form.control} name="email" render={({ field }) => (
-                        <FormItem><FormLabel>Email (Privé)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage/></FormItem>
-                    )}/>
-                </div>
-              </div>
-            )}
-          </form>
-        </Form>
-      </CardContent>
-
-      <CardFooter className="flex justify-between p-6 bg-muted/20">
-        <Button variant="ghost" onClick={prevStep} disabled={step === 1} className={step === 1 ? "invisible" : ""}><ChevronLeft className="mr-2 h-4 w-4"/> Retour</Button>
-        {step < 4 ? <Button onClick={nextStep}>Suivant <ChevronRight className="ml-2 h-4 w-4"/></Button> : <Button onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>{isSubmitting ? "Envoi..." : "Valider ma proposition"}</Button>}
-      </CardFooter>
-    </Card>
+          </div>
+        </div>
+      </div>
+    </section>
   )
 }
