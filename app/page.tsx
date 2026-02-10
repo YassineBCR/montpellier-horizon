@@ -32,11 +32,10 @@ export default function Home() {
                   À vous de jouer
                 </Badge>
                 <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
-                  Exprimez-vous pour <span className="text-primary">votre quartier</span>
+                 Déposer  <span className="text-primary">une proposition</span>
                 </h2>
                 <p className="text-xl text-muted-foreground leading-relaxed">
-                  Une idée ? Une observation ? Proposez-la maintenant. <br className="hidden md:inline"/>
-                  C'est simple, rapide et votre impact est réel.
+                  Partagez votre idée en quelques étapes simples.
                 </p>
              </div>
              
@@ -54,7 +53,7 @@ export default function Home() {
                   L'actualité des propositions
                 </h2>
                 <p className="text-lg text-muted-foreground">
-                    Découvrez les sujets qui font débat et votez pour vos priorités.
+                    Découvrez les idées de la communauté et soutenez celles qui comptent pour vous
                 </p>
             </div>
             
@@ -70,10 +69,10 @@ export default function Home() {
                 <div className="text-center mb-16 max-w-3xl mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-8 duration-700">
                     <span className="text-primary font-bold tracking-wider uppercase text-xs">Notre ADN</span>
                     <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900">
-                        Nos Piliers Fondateurs
+                        Notre manifeste
                     </h2>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                        Transparence, Inclusion, Action.
+                        Les valeurs qui guident cette démarche citoyenne.
                     </p>
                 </div>
                 <div className="mx-auto max-w-7xl">

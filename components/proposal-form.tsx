@@ -64,7 +64,7 @@ export function ProposalForm() {
       <div className="absolute top-0 left-0 h-1 bg-primary transition-all duration-500 ease-in-out" style={{ width: `${(step / 4) * 100}%` }} />
       
       <CardHeader className="pb-8 text-center pt-10">
-        <CardTitle className="text-3xl font-bold">Nouvelle Contribution</CardTitle>
+        <CardTitle className="text-3xl font-bold">Nouvelle Proposition</CardTitle>
         <CardDescription className="text-lg">Étape {step} sur 4</CardDescription>
       </CardHeader>
 

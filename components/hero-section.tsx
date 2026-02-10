@@ -11,13 +11,12 @@ export function HeroSection() {
       </div>
       
       <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter leading-tight text-center bg-clip-text text-transparent bg-gradient-to-b from-gray-900 to-gray-700">
-        Réinventons la ville,<br /> 
-        <span className="text-primary bg-clip-text bg-gradient-to-r from-primary to-blue-600">quartier par quartier.</span>
+        Votre voix construit le ,<br /> 
+        <span className="text-primary bg-clip-text bg-gradient-to-r from-primary to-blue-600">Montpellier de demain.</span>
       </h1>
       
       <p className="text-xl text-muted-foreground text-center max-w-2xl mx-auto leading-relaxed">
-        Loin des promesses électorales, construisons ensemble un avenir concret. 
-        Votre voix est le point de départ du changement.
+        Collectons, structurons et présentons nos besoins aux candidats des municipales. Une plateforme citoyenne ouverte et transparente.
       </p>
       
       <div className="flex flex-wrap justify-center gap-4 pt-4">
